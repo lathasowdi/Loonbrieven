@@ -9,11 +9,20 @@ namespace Loonbrieven
    public class Programmeur:Werknemer
     {
         public bool BedrijfWagen;
-        public Programmeur(string naam, string geslacht, DateTime geboorteDatum, string rijksRegisterNummer, DateTime indiensttreding, string functie, string iBANNummer, string typecontract = "Voltijds", double startloon = 2200.00, double socialeZekerheid = 200, bool bedrijfWagen) : base(naam, geslacht,geboorteDatum, rijksRegisterNummer, indiensttreding,functie, iBANNummer,typecontract,startloon,socialeZekerheid)
+        public Programmeur(string naam, string geslacht, DateTime geboorteDatum, string rijksRegisterNummer, DateTime indiensttreding, int aantalGepresenteerdUren, bool bedrijfswagen,bool bedrijfWagen ,string functie="Programmeur", string typecontract = "Voltijds", double startloon = 2200.00, double socialeZekerheid = 200, double bedrijfsVoorheffing = 13.68) : base(naam, geslacht,geboorteDatum, rijksRegisterNummer, indiensttreding, aantalGepresenteerdUren, bedrijfswagen,functie, typecontract,startloon,socialeZekerheid, bedrijfsVoorheffing)
         {
+            
             BedrijfWagen = bedrijfWagen;
-            BedrijfsVoorheffing = (bedrijfWagen == true ? 17.30 : 13.68);
 
+        }
+        public override string Beschrijf()
+        {
+            return base.Beschrijf() + $"BEDRIJFSWAGEN: {(BedrijfWagen ? "Ja" : "Nee")}";
+        }
+        public override string Loonbrieven()
+        {
+            BedrijfsVoorheffing = (BedrijfWagen == true ? 17.30 : 13.68);
+            return base.Loonbrieven();
         }
     }
 }
