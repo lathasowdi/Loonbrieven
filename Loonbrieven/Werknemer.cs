@@ -47,12 +47,6 @@ namespace Loonbrieven
         public virtual double Uurberekening()
         {
             double uurberekening = 0;
-            //int uren;
-
-            //if (Typecontract == "Voltijds")
-            //    uren = 38;
-            //else
-            //    uren =25;
             uurberekening = AantalGepresenteerdUren / 38 * Startloon;
             return Math.Round(uurberekening, 2);
         }

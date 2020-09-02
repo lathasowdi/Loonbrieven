@@ -12,6 +12,12 @@ namespace Loonbrieven
         {
 
         }
+        public override double Uurberekening()
+        {
+            double uurberekening;
+            uurberekening = AantalGepresenteerdUren / 38 * Startloon;
+            return Math.Round(uurberekening, 2);
+        }
         public override double Ancienniteit()
         {
             int aantaljaren = 0;
@@ -25,6 +31,18 @@ namespace Loonbrieven
             ancienniteit += ancienniteit * .06;
             ancienniteit -= Startloon;
             return ancienniteit;
+        }
+        public override double NaSocialeZekerheid()
+        {
+            double Nasociale = Uurberekening() + Ancienniteit();
+            Nasociale -= 200;
+            return Math.Round(Nasociale, 2);
+        }
+        public override double Netto()
+        {
+            double netto = NaSocialeZekerheid();
+            netto -= (netto * 0.1368);
+            return Math.Round(netto, 2);
         }
         public override string Beschrijf()
         {
