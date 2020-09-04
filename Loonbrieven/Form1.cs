@@ -115,7 +115,7 @@ namespace Loonbrieven
 
         private void button3_Click(object sender, EventArgs e)
         {
-            WerknemerAdd oef = new WerknemerAdd();
+            nieuwewerknemeradd oef = new nieuwewerknemeradd();
             if (oef.ShowDialog() == DialogResult.OK)
             {
                 string geslacht = "";
@@ -170,6 +170,24 @@ namespace Loonbrieven
    MessageBoxIcon.Exclamation,
    MessageBoxDefaultButton.Button1);
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+                if (comboBox2 != null)
+                {
+                    nieuwewerknemeradd werknemer = new nieuwewerknemeradd(comboBox2.SelectedItem as Werknemer);
+                    if (werknemer.ShowDialog() == DialogResult.OK)
+                    {
+                    button2_Click(sender, e);
+                    button3_Click(sender, e);
+                    //CategoryLijst[comboBox1.SelectedIndex].WerknemerAdd(new Werknemer(werknemer));
+                        //werknemers.Add(werknemer.werknemer);
+                    }
+                }
+                //LaadWerknemers();
+            }
+
+        }
     }
-    }
+    
 
