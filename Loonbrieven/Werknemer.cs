@@ -16,14 +16,14 @@ namespace Loonbrieven
         public string RijksRegisterNummer { get; set; }
         public DateTime Indiensttreding { get; set; }
         public string Functie { get; set; }
-        public string IBANNummer { get; set; }
+        public string IbanNummer { get; set; }
         public string Typecontract { get; set; }
         public double Startloon { get; set; }
         public double BedrijfsVoorheffing { get; set; }
         public double SocialeZekerheid { get; set; }
         public int AantalGepresenteerdUren { get; set; }
         public bool Bedrijfswagen { get; set; }
-        public Werknemer(string naam, string geslacht, DateTime geboorteDatum, string rijksRegisterNummer, DateTime indiensttreding, int aantalGepresenteerdUren, bool bedrijfswagen, string functie = "Werknemer", string typecontract = "Voltijds", double startloon = 1900.00, double bedrijfsVoorheffing = 13.68, double socialeZekerheid = 200)
+        public Werknemer(string naam, string geslacht, DateTime geboorteDatum, string rijksRegisterNummer, DateTime indiensttreding, int aantalGepresenteerdUren, string ibanNummer, string functie = "Werknemer", string typecontract = "Voltijds", double startloon = 1900.00, double bedrijfsVoorheffing = 13.68, double socialeZekerheid = 200)
         {
             Naam = naam;
             Geslacht = geslacht;
@@ -31,7 +31,7 @@ namespace Loonbrieven
             RijksRegisterNummer = rijksRegisterNummer;
             Indiensttreding = indiensttreding;
             AantalGepresenteerdUren = aantalGepresenteerdUren;
-            Bedrijfswagen = bedrijfswagen;
+            IbanNummer = ibanNummer;
             Functie = functie;
             Typecontract = typecontract;
             Startloon = startloon;
@@ -44,62 +44,63 @@ namespace Loonbrieven
         {
             return Naam;
         }
-        public virtual double Uurberekening()
+        public virtual double Uurberekendstartloon()
         {
-            double uurberekening = 0;
-            uurberekening = AantalGepresenteerdUren / 38 * Startloon;
-            return Math.Round(uurberekening, 2);
+            double uurberekening = (double)AantalGepresenteerdUren / 38;
+            return uurberekening*Startloon;
         }
         public virtual double Ancienniteit()
         {
-            int aantaljaren = 0;
-            double ancienniteit = Uurberekening();
-            aantaljaren = DateTime.Now.Year - Indiensttreding.Year;
+            double ancienniteit = Uurberekendstartloon();
+            int aantaljaren = DateTime.Now.Year - Indiensttreding.Year;
 
-            for (int i = 0; i < aantaljaren; i++)
+            for (int i = 1; i <= aantaljaren; i++)
             {
                 ancienniteit *= 1.01;
             }
-            ancienniteit -= Startloon;
+            ancienniteit -= Uurberekendstartloon();
             return Math.Round(ancienniteit, 2);
         }
         public virtual double NaSocialeZekerheid()
         {
-            double Nasociale = Uurberekening() + Ancienniteit();
+            double Nasociale = Uurberekendstartloon() + Ancienniteit();
             Nasociale -= 200;
             return Math.Round(Nasociale, 2);
         }
+        
+        public virtual double Bedrijfsvoorheffing()
+        {
+            return NaSocialeZekerheid() * 0.1368;
+        }
         public virtual double Netto()
         {
-            double netto = NaSocialeZekerheid();
-            netto -= (netto * 0.1368);
+            double netto = NaSocialeZekerheid()- Bedrijfsvoorheffing();
             return Math.Round(netto, 2);
         }
         public virtual string Beschrijf()
         {
             string beschrijf = "";
             beschrijf =
-                  $"Naam: {Naam}" + "\n"
-                + $"Geslacht: {Geslacht}" + "\n"
-                + $"GeboorteDatum: {GeboorteDatum.ToString("dd/MM/yyyy")}" + "\n"
-                + $"RijksRegisterNummer: {RijksRegisterNummer}" + "\n"
-                + $"InDatumIndiensttreding: {Indiensttreding.ToString("dd/MM/yyyy")}" + "\n"
-                + $"Functie: {Functie}" + "\n"
-                + $"TypeContract: {Typecontract}" + "\n";
+                  $"NAAM                 :{Naam}" + "\n"
+                + $"GESLACHT              :{Geslacht}" + "\n"
+                + $"GEBOORTEDATUM        :{GeboorteDatum.ToString("dd/MM/yyyy")}" + "\n"
+                + $"RIJKSREGISTERNUMMER   :{RijksRegisterNummer}" + "\n"
+                + $"INDATUMINDIENSTTREDING:{Indiensttreding.ToString("dd/MM/yyyy")}" + "\n"
+                + $"FUNCTIE               :{Functie}" + "\n"
+                + $"TYPECONTRACT          :{Typecontract}" + "\n"
+                + $"IBANNUMMER          :{IbanNummer}" + "\n";
             return beschrijf;
         }
         public virtual string Loonbrieven()
         {
             string beschrijf = "";
             beschrijf =
-            $"STARTLOON                 :   € {Uurberekening()}" + "\n"
-           + $"ANCIENNITEIT              : + € {Math.Round(Ancienniteit(), 2)}" + "\n"
-           + $"                          :      € {Math.Round(Uurberekening() + Ancienniteit(), 2)}" + "\n"
-           + $"SOCIALE ZEKERHEID         : - €200" + "\n"
-           + $"                          :      €{Math.Round(Uurberekening() + Ancienniteit(), 2) - 200}" + "\n"
-           + $"BEDRIJFSVOORHEFFING       : - €{Math.Round(NaSocialeZekerheid() * BedrijfsVoorheffing / 100, 2)}" + "\n"
-           + $"                          :      €{Math.Round(Uurberekening() + Ancienniteit() - 200 - NaSocialeZekerheid() * BedrijfsVoorheffing / 100, 2)}" + "\n"
-           + $"NETTOLOON                 :  €{Netto()}";
+            $"STARTLOON                :€ {Uurberekendstartloon()}" + "\n"
+           + $"ANCIENNITEIT            :€ {Math.Round(Ancienniteit(), 2)}" + "\n"
+           + $"SOCIALE ZEKERHEID       :€200" + "\n"
+           + $"NASOCIALEZEKERHEID      :€{ NaSocialeZekerheid()}" + "\n"
+           + $"BEDRIJFSVOORHEFFING     :€{Math.Round(Bedrijfsvoorheffing(),2)}" + "\n"
+           + $"NETTOLOON               :€{Netto()}";
             return beschrijf;
         }
         public void MaakLoonBrief(string bestandsLocatie)
@@ -109,21 +110,33 @@ namespace Loonbrieven
             {
                 writer.WriteLine("-----------------------------------------------------------");
                 writer.WriteLine($"NAAM                     :{Naam}");
-                writer.WriteLine($"RIJKSREGISTERNUMMER      :{RijksRegisterNummer}");
                 writer.WriteLine($"GESLACHT                 :{Geslacht}");
                 writer.WriteLine($"GEBOORTEDATUM            :{GeboorteDatum.ToShortDateString()}");
+                writer.WriteLine($"RIJKSREGISTERNUMMER      :{RijksRegisterNummer}");
                 writer.WriteLine($"DATUM INDIENSTTREDING    :{Indiensttreding.ToShortDateString()}");
                 writer.WriteLine($"FUNCTIE                  :{Functie}");
+                writer.WriteLine($"TYPECONTRACT             :{Typecontract}");
                 writer.WriteLine($"AANTAL GEPRESTEERDE UREN :{AantalGepresenteerdUren}");
-                writer.WriteLine($"BEDRIJFSWAGEN            :{(Bedrijfswagen ? "Ja" : "Nee")}");
+                writer.WriteLine($"IBANNUMMER               :{IbanNummer}");
+                if (Functie == "Programmeur")
+                {
+                    writer.WriteLine($"BEDRIJFSWAGEN            :{(Bedrijfswagen ? "Ja" : "Nee")}");
+                }
                 writer.WriteLine("-----------------------------------------------------------");
-                writer.WriteLine($"STARTLOON                :   € {Math.Round(Uurberekening(), 2)}");
+                writer.WriteLine($"STARTLOON                :   € {Math.Round(Uurberekendstartloon(), 2)}");
                 writer.WriteLine($"ANCIËNNITEIT             : + € {Math.Round(Ancienniteit(), 2)}");
-                writer.WriteLine($"                             €{Math.Round(Uurberekening() + Ancienniteit(), 2)}");
+                writer.WriteLine($"                             €{Math.Round(Uurberekendstartloon() + Ancienniteit(), 2)}");
                 writer.WriteLine($"SOCIALE ZEKERHEID        : - €200");
-                writer.WriteLine($"                             €{Math.Round(Uurberekening() + Ancienniteit(), 2) - 200}");
-                writer.WriteLine($"BEDRIJFSVOORHEFFING      : - €{Math.Round(NaSocialeZekerheid() * BedrijfsVoorheffing / 100, 2)}");
-                writer.WriteLine($"                             €{Math.Round(Uurberekening() + Ancienniteit() - 200 - NaSocialeZekerheid() * BedrijfsVoorheffing / 100, 2)}");
+                writer.WriteLine($"                             €{Math.Round(NaSocialeZekerheid())}");
+                writer.WriteLine($"BEDRIJFSVOORHEFFING      : - €{Math.Round(Bedrijfsvoorheffing(), 2)}");
+                if (Functie.ToLower().Contains("support"))
+                {
+                    writer.WriteLine("THUISWERKTWEEDAGEN           :+ €50");
+                    if (Functie.ToLower() == "customersupport")
+                    {
+                        writer.WriteLine("OPLEIDING            :+€19.50");
+                    }
+                }
                 writer.WriteLine($"NETTOLOON                :   €{Math.Round(Netto(), 2)}");
 
                 writer.WriteLine("-----------------------------------------------------------");

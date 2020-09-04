@@ -6,47 +6,38 @@ using System.Threading.Tasks;
 
 namespace Loonbrieven
 {
-    public class ITSupport:Support
+    public class ITSupport : Support
     {
-        public ITSupport (string naam, string geslacht, DateTime geboorteDatum, string rijksRegisterNummer, DateTime indiensttreding, int aantalGepresenteerdUren, bool bedrijfswagen, string functie="IT Support", string typecontract = "Voltijds", double startloon = 2050.00, double tweedagenperweekextra = 50.0) : base(naam, geslacht, geboorteDatum, rijksRegisterNummer, indiensttreding, aantalGepresenteerdUren, bedrijfswagen, functie, typecontract, startloon, tweedagenperweekextra)
+        public ITSupport(string naam, string geslacht, DateTime geboorteDatum, string rijksRegisterNummer, DateTime indiensttreding, int aantalGepresenteerdUren,String ibanNummer, string functie = "IT Support", string typecontract = "Voltijds", double startloon = 2050.00, double tweedagenperweekextra = 50.0) : base(naam, geslacht, geboorteDatum, rijksRegisterNummer, indiensttreding, aantalGepresenteerdUren, ibanNummer, functie, typecontract, startloon, tweedagenperweekextra)
         {
 
         }
-        public override double Uurberekening()
+        public double afgetrokken;
+        public override double Uurberekendstartloon()
         {
             double uurberekening;
             uurberekening = AantalGepresenteerdUren / 38 * Startloon;
+            afgetrokken = uurberekening * 0.06;
+            uurberekening -= afgetrokken;
             return Math.Round(uurberekening, 2);
         }
         public override double Ancienniteit()
         {
-            int aantaljaren = 0;
-            Startloon -= Startloon * .06;
-            double ancienniteit = Startloon;
-            aantaljaren = DateTime.Now.Year - Indiensttreding.Year;
-            for (int i = 0; i < aantaljaren; i++)
+            double ancienniteit = Uurberekendstartloon();
+            int aantaljaren = DateTime.Now.Year - Indiensttreding.Year;
+            for (int i = 1; i <= aantaljaren; i++)
             {
                 ancienniteit *= 1.01;
             }
-            ancienniteit += ancienniteit * .06;
-            ancienniteit -= Startloon;
+            ancienniteit -= Uurberekendstartloon();
+            ancienniteit += afgetrokken;
             return ancienniteit;
         }
-        public override double NaSocialeZekerheid()
-        {
-            double Nasociale = Uurberekening() + Ancienniteit();
-            Nasociale -= 200;
-            return Math.Round(Nasociale, 2);
-        }
-        public override double Netto()
-        {
-            double netto = NaSocialeZekerheid();
-            netto -= (netto * 0.1368);
-            return Math.Round(netto, 2);
-        }
+
         public override string Beschrijf()
         {
             return base.Beschrijf();
+
         }
     }
 }
